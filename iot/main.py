@@ -134,9 +134,9 @@ def main():
         # payload = {"temperature": dht11.temperature, "humidity": dht11.humidity}
         payload = {"temperature": 24, "humidity": 30}
         # payload = '{}/{}-payload'.format(registry_id, device_id)
-        print('Publishing message {}'.format(json.dumps(payload)))
+        print('Publishing message {}'.format(payload))
 
-        client.publish(mqtt_topic, payload, qos=1)
+        client.publish(mqtt_topic, json.dumps(payload), qos=1)
 
         # Send events every second. State should not be updated as often
         time.sleep(1)
