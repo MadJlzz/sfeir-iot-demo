@@ -213,5 +213,7 @@ dmypy.json
 pyvenv.cfg
 pip-selfcheck.json
 
+### Certificates ##
+certs/
 
 # End of https://www.gitignore.io/api/python,pycharm+all
