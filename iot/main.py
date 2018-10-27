@@ -3,7 +3,7 @@ import ssl
 import time
 
 import jwt
-from paho import mqtt
+import paho.mqtt.client as mqtt
 
 
 def create_jwt(project_id, private_key_file, algorithm):
@@ -74,11 +74,7 @@ def get_client(
     this device. For Google Cloud IoT Core, it must be in the format below."""
     client = mqtt.Client(
         client_id=('projects/{}/locations/{}/registries/{}/devices/{}'
-            .format(
-            project_id,
-            cloud_region,
-            registry_id,
-            device_id)))
+                   .format(project_id, cloud_region, registry_id, device_id)))
 
     # With Google Cloud IoT Core, the username field is ignored, and the
     # password field is used to transmit a JWT to authorize the device.
