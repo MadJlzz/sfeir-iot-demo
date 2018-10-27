@@ -4,7 +4,8 @@ import ssl
 
 # The callback for when the client receives a CONNACK response from the server.
 def on_connect(client, userdata, flags, rc):
-    print("Connected with result code " + str(rc))
+    """Callback for when a device connects."""
+    print("on_connect" + mqtt.connack_string(rc))
 
 
 iot_projectId = "sfeir-iot-demo"
@@ -18,7 +19,6 @@ private_certificate_path = "/home/pi/Documents/repositories/sfeir-iot-demo/certs
 client = mqtt.Client("projects/{}/locations/{}/registries/{}/devices/{}".format(iot_projectId, iot_cloudRegion,
                                                                                 iot_registryId, iot_deviceId))
 client.tls_set(None, public_certificate_path, private_certificate_path, ssl.CERT_REQUIRED, ssl.PROTOCOL_TLS)
-client.tls_set_context(ssl.create_default_context())
 
 client.on_connect = on_connect
 
