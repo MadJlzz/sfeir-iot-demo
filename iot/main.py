@@ -2,8 +2,11 @@ import datetime
 import ssl
 import time
 
+import json
 import jwt
 import paho.mqtt.client as mqtt
+
+# from iot.sensor import DHT11
 
 
 def create_jwt(project_id, private_key_file, algorithm):
@@ -101,7 +104,7 @@ def get_client(
 
 
 def main():
-    mqtt_topic = '/devices/{}/{}'.format("pi-madpi", "events")
+    # dht11 = DHT11()
 
     project_id = "sfeir-iot-demo"
     cloud_region = "europe-west1"
@@ -113,6 +116,8 @@ def main():
     mqtt_bridge_hostname = "mqtt.googleapis.com"
     mqtt_bridge_port = 8883
 
+    mqtt_topic = '/devices/{}/{}'.format("pi-madpi", "events")
+
     client = get_client(
         project_id, cloud_region, registry_id, device_id,
         private_key_file, algorithm, ca_certs,
@@ -123,8 +128,13 @@ def main():
         # Process network events.
         client.loop()
 
-        payload = '{}/{}-payload'.format(registry_id, device_id)
-        print('Publishing message {}'.format(payload))
+        # Get temperature and humidity
+        # dht11.read_dht11()
+
+        # payload = {"temperature": dht11.temperature, "humidity": dht11.humidity}
+        payload = {"temperature": 24, "humidity": 30}
+        # payload = '{}/{}-payload'.format(registry_id, device_id)
+        print('Publishing message {}'.format(json.dumps(payload)))
 
         client.publish(mqtt_topic, payload, qos=1)
 

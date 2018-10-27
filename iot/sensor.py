@@ -7,9 +7,9 @@ import Adafruit_DHT
 #
 class DHT11:
 
-    def __init__(self, temperature, humidity):
-        self.temperature = temperature
-        self.humidity = humidity
+    def __init__(self):
+        self.temperature = 0
+        self.humidity = 0
 
     def __str__(self):
         return 'Temp: {0:0.1f} C Humidity: {1:0.1f} %'.format(self.temperature, self.humidity)
