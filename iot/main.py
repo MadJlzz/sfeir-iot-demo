@@ -6,7 +6,7 @@ import json
 import jwt
 import paho.mqtt.client as mqtt
 
-from iot.sensor import DHT11
+from sensor import DHT11
 
 
 def create_jwt(project_id, private_key_file, algorithm):

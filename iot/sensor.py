@@ -8,11 +8,11 @@ import Adafruit_DHT
 class DHT11:
 
     def __init__(self):
-        self.temperature = 0
         self.humidity = 0
+        self.temperature = 0
 
     def __str__(self):
         return 'Temp: {0:0.1f} C Humidity: {1:0.1f} %'.format(self.temperature, self.humidity)
 
     def read_dht11(self):
-        self.temperature, self.humidity = Adafruit_DHT.read_retry(11, 4)
+        self.humidity, self.temperature = Adafruit_DHT.read_retry(11, 4)
