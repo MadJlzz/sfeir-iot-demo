@@ -1,12 +1,55 @@
 import datetime
+import json
 import ssl
 import time
 
-import json
 import jwt
 import paho.mqtt.client as mqtt
+from ledrgb import LedRGB
+from sensor import DHT
 
-from sensor import DHT11
+components = {'dht11': DHT(), 'led_rgb': LedRGB(), 'is_client_down': True}
+
+
+def main():
+    project_id = "sfeir-iot-demo"
+    cloud_region = "europe-west1"
+    registry_id = "sfeir-iot-registry"
+    device_id = "pi-madpi"
+    private_key_file = "certs/rsa_private.pem"
+    algorithm = "RS256"
+    ca_certs = "certs/roots.pem"
+    mqtt_bridge_hostname = "mqtt.googleapis.com"
+    mqtt_bridge_port = 8883
+
+    mqtt_topic = '/devices/{}/{}'.format("pi-madpi", "events")
+
+    client = get_client(
+        project_id, cloud_region, registry_id, device_id,
+        private_key_file, algorithm, ca_certs,
+        mqtt_bridge_hostname, mqtt_bridge_port)
+
+    # Publish DHT11 temperature and humidity values.
+    while True:
+
+        client.loop()
+
+        if components['is_client_down']:
+            print('Client seems down, trying to reconnect.')
+            client.reconnect()
+            time.sleep(3)
+        else:
+
+            # Get temperature and humidity
+            components['dht11'].read_dht11()
+
+            payload = {"temperature": components['dht11'].temperature, "humidity": components['dht11'].humidity}
+            print('Trying to publish the message {} to the GCP.'.format(payload))
+
+            client.publish(mqtt_topic, json.dumps(payload), qos=1)
+
+        # Send events every three second.
+        time.sleep(3)
 
 
 def create_jwt(project_id, private_key_file, algorithm):
@@ -35,22 +78,28 @@ def error_str(rc):
     return '{}: {}'.format(rc, mqtt.error_string(rc))
 
 
-def on_connect(unused_client, unused_userdata, unused_flags, rc):
+def on_connect(unused_client, user_data, unused_flags, rc):
     print('Trying to connect to the MQTT broker: ', mqtt.connack_string(rc))
+    if rc == mqtt.CONNACK_ACCEPTED:
+        components['is_client_down'] = False
+        components['led_rgb'].set_color(100, 0, 100)
 
 
-def on_disconnect(unused_client, unused_userdata, rc):
+def on_disconnect(unused_client, user_data, rc):
     print('Disconnection from the MQTT broker. Reason: ', error_str(rc))
+    if rc != mqtt.MQTT_ERR_SUCCESS:
+        components['is_client_down'] = True
+        components['led_rgb'].set_color(0, 100, 100)
 
 
-def on_publish(unused_client, unused_userdata, unused_mid):
-    print('Message has been successfully published !')
+def on_publish(unused_client, user_data, unused_mid):
+    print('A new message has been successfully published !')
+    components['led_rgb'].set_color(100, 100, 0)
 
 
 def get_client(
         project_id, cloud_region, registry_id, device_id, private_key_file,
         algorithm, ca_certs, mqtt_bridge_hostname, mqtt_bridge_port):
-
     client = mqtt.Client(
         client_id=('projects/{}/locations/{}/registries/{}/devices/{}'
                    .format(project_id, cloud_region, registry_id, device_id)))
@@ -75,42 +124,8 @@ def get_client(
     return client
 
 
-def main():
-    dht11 = DHT11()
-
-    project_id = "sfeir-iot-demo"
-    cloud_region = "europe-west1"
-    registry_id = "sfeir-iot-registry"
-    device_id = "pi-madpi"
-    private_key_file = "certs/rsa_private.pem"
-    algorithm = "RS256"
-    ca_certs = "certs/roots.pem"
-    mqtt_bridge_hostname = "mqtt.googleapis.com"
-    mqtt_bridge_port = 8883
-
-    mqtt_topic = '/devices/{}/{}'.format("pi-madpi", "events")
-
-    client = get_client(
-        project_id, cloud_region, registry_id, device_id,
-        private_key_file, algorithm, ca_certs,
-        mqtt_bridge_hostname, mqtt_bridge_port)
-
-    # Publish DHT11 temperature and humidity values.
-    while True:
-        # Process network events.
-        client.loop()
-
-        # Get temperature and humidity
-        dht11.read_dht11()
-
-        payload = {"temperature": dht11.temperature, "humidity": dht11.humidity}
-        print('Publishing message {}'.format(payload))
-
-        client.publish(mqtt_topic, json.dumps(payload), qos=1)
-
-        # Send events every three second.
-        time.sleep(3)
-
-
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        components['led_rgb'].reset_gpio()

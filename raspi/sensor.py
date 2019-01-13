@@ -5,7 +5,9 @@ import Adafruit_DHT
 # This class aims to read temperature and humidity from a DHT11 sensor.
 # It uses the Adafruit_DHT library to reach it's goal.
 #
-class DHT11:
+class DHT:
+    DHT_MODEL = 11
+    GPIO_PIN = 13
 
     def __init__(self):
         self.humidity = 0
@@ -15,4 +17,4 @@ class DHT11:
         return 'Temp: {0:0.1f} C Humidity: {1:0.1f} %'.format(self.temperature, self.humidity)
 
     def read_dht11(self):
-        self.humidity, self.temperature = Adafruit_DHT.read_retry(11, 4)
+        self.humidity, self.temperature = Adafruit_DHT.read_retry(DHT.DHT_MODEL, DHT.GPIO_PIN)
