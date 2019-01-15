@@ -12,17 +12,17 @@ components = {'dht11': DHT(), 'led_rgb': LedRGB(), 'is_client_down': True}
 
 
 def main():
-    project_id = "sfeir-iot-demo"
-    cloud_region = "europe-west1"
-    registry_id = "sfeir-iot-registry"
-    device_id = "pi-madpi"
-    private_key_file = "certs/rsa_private.pem"
-    algorithm = "RS256"
-    ca_certs = "certs/roots.pem"
+    project_id = "TBD"
+    cloud_region = "TBD"
+    registry_id = "TBD"
+    device_id = "TBD"
+    private_key_file = "TBD"
+    algorithm = "TBD"
+    ca_certs = "TBD"
     mqtt_bridge_hostname = "mqtt.googleapis.com"
     mqtt_bridge_port = 8883
 
-    mqtt_topic = '/devices/{}/{}'.format("pi-madpi", "events")
+    mqtt_topic = '/devices/{}/{}'.format(device_id, "events")
 
     client = get_client(
         project_id, cloud_region, registry_id, device_id,
